@@ -21,26 +21,27 @@ app.use(cors());
 app.post('/', (req, res) => {
     const input_url = req.body.org_url;
     const domain_name = 'http://localhost:3000/';
-    const randomstring = Math.random().toString(32).substring(2,6)+Math.random().toString(32).substring(2,6);
-    const output_url = domain_name+randomstring;
+    const urlcode = Math.random().toString(32).substring(2,6)+Math.random().toString(32).substring(2,6);
+    const output_url = domain_name+urlcode;
     
-    db('urldb').insert({input_url:input_url,output_url:output_url})
+    db('urldb').insert({input_url:input_url,urlcode:urlcode,output_url:output_url})
         .then(console.log('success'))
         
     res.json(output_url);
-
-    console.log(input_url);
-    console.log(output_url);
 })
 
 app.get('/', (req,res) => {
     res.send('this is working');
 });
 
-app.get('/:code', (req,res) => {
-    res.send('this is working too');
-    console.log(req.params.code);
-    // res.redirect('https://www.youtube.com/watch?v=paNikhYqdz0');
+app.get('/:code', async (req,res) => {
+
+    const redirectlink = 
+            await db('urldb').where({urlcode:req.params.code})
+                .select('input_url')
+                .then(value => {return value});
+
+    res.redirect(redirectlink[0].input_url);
 });
 
 app.listen(3000, () => {console.log('app is running on port 3000');
