@@ -27,10 +27,16 @@ app.post('/', (req, res) => {
         const domain_name = 'http://localhost:3000/';
         const urlcode = Math.random().toString(32).substring(2,6)+Math.random().toString(32).substring(2,6);
         const output_url = domain_name+urlcode;
-    
-        db('urldb').insert({input_url:input_url,urlcode:urlcode,output_url:output_url})
-            .then(console.log('Database Updated'))
-        res.json(output_url);
+        db.select("urlcode").from("urldb")
+            .where({urlcode:urlcode})
+            .then(data => {
+                if(data.length > 0) {
+                    res.json("Retry")
+                } else {
+                    db('urldb').insert({input_url:input_url,urlcode:urlcode,output_url:output_url})
+                    .then(data => {res.json(output_url)});
+                }
+            }).catch(err => console.log("Error in Checking Database"))
     } else {
         res.json("Invalid Url");
     }
@@ -40,14 +46,9 @@ app.get('/', (req,res) => {
     res.send('this is working');
 });
 
-app.get('/:code', async (req,res) => {
-
-    const redirectlink = 
-            await db('urldb').where({urlcode:req.params.code})
-                .select('input_url')
-                .then(value => {return value});
-
-    res.redirect(redirectlink[0].input_url);
+app.get('/:code', (req,res) => {
+    db('urldb').where({urlcode:req.params.code}).select('input_url')
+    .then(value => {res.redirect(value[0].input_url)})
 });
 
 app.listen(3000, () => {console.log('app is running on port 3000');
