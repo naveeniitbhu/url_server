@@ -20,14 +20,20 @@ app.use(cors());
 
 app.post('/', (req, res) => {
     const input_url = req.body.org_url;
-    const domain_name = 'http://localhost:3000/';
-    const urlcode = Math.random().toString(32).substring(2,6)+Math.random().toString(32).substring(2,6);
-    const output_url = domain_name+urlcode;
+    const check_url = input_url.startsWith("http://") ||
+                        input_url.startsWith("https://") ||
+                        input_url.startsWith("ftp://");
+    if(check_url) {
+        const domain_name = 'http://localhost:3000/';
+        const urlcode = Math.random().toString(32).substring(2,6)+Math.random().toString(32).substring(2,6);
+        const output_url = domain_name+urlcode;
     
-    db('urldb').insert({input_url:input_url,urlcode:urlcode,output_url:output_url})
-        .then(console.log('success'))
-        
-    res.json(output_url);
+        db('urldb').insert({input_url:input_url,urlcode:urlcode,output_url:output_url})
+            .then(console.log('Database Updated'))
+        res.json(output_url);
+    } else {
+        res.json("Invalid Url");
+    }
 })
 
 app.get('/', (req,res) => {
