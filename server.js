@@ -30,7 +30,6 @@ app.post('/', (req, res) => {
         db.select("input_url").from("urldb")
             .where({input_url:input_url})
             .then(data => {
-                console.log(data)
                 if(data.length > 0) {
                     res.json("Retry")
                 } else {
