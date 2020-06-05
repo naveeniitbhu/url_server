@@ -8,7 +8,7 @@ const db = knex({
     connection: {
       host : '127.0.0.1',
       user : 'naveen',
-      password : 'naveen',
+      password : 'pspasswd',
       database : 'urlshort'
     }
 });
@@ -27,9 +27,10 @@ app.post('/', (req, res) => {
         const domain_name = 'http://localhost:3000/';
         const urlcode = Math.random().toString(32).substring(2,6)+Math.random().toString(32).substring(2,6);
         const output_url = domain_name+urlcode;
-        db.select("urlcode").from("urldb")
-            .where({urlcode:urlcode})
+        db.select("input_url").from("urldb")
+            .where({input_url:input_url})
             .then(data => {
+                console.log(data)
                 if(data.length > 0) {
                     res.json("Retry")
                 } else {
